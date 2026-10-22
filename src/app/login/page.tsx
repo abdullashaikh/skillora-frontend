@@ -1,20 +1,52 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { apiFetch, parseApiResponse, setStoredToken } from '@/lib/api';
-import { Sparkles, AlertCircle, ArrowRight, Lock, Mail } from 'lucide-react';
+import { Sparkles, AlertCircle, ArrowRight, Lock, Mail, CheckCircle2 } from 'lucide-react';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirect') || '';
+  const queryError = searchParams.get('error') || '';
+  const queryEmail = searchParams.get('email') || '';
+  const queryLinked = searchParams.get('linked') || '';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [infoNotice, setInfoNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (queryEmail) {
+      setEmail(queryEmail);
+    }
+
+    if (queryError === 'account_exists_link_required') {
+      setInfoNotice(
+        'An account with this email already exists. Please sign in with your password to link your Google account.'
+      );
+    } else if (queryError === 'google_cancelled') {
+      setErrorMessage('Google sign-in was cancelled.');
+    } else if (queryError === 'google_not_configured') {
+      setErrorMessage('Google authentication is not yet configured on this server.');
+    } else if (queryError === 'account_suspended') {
+      setErrorMessage('This account has been suspended or deactivated. Please contact an administrator.');
+    } else if (queryError === 'google_failed') {
+      const detail = searchParams.get('detail');
+      setErrorMessage(detail ? `Google authentication failed: ${detail}` : 'Google authentication failed. Please try again.');
+    } else if (queryError === 'invalid_oauth_state' || queryError === 'expired_oauth_state') {
+      setErrorMessage('Authentication session expired or was invalid. Please try again.');
+    }
+
+    if (queryLinked === 'google') {
+      setInfoNotice('Your Google account was successfully linked!');
+    }
+  }, [queryError, queryEmail, queryLinked, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,13 +92,37 @@ function LoginForm() {
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-5">
+      {/* Notice & Error Banners */}
+      {infoNotice && (
+        <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-xl flex items-start space-x-2 text-xs text-indigo-800">
+          <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-indigo-600 mt-0.5" />
+          <span>{infoNotice}</span>
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start space-x-2 text-xs text-red-700">
+          <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-600 mt-0.5" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {/* Google Sign-In */}
+      <GoogleSignInButton mode="login" redirectUrl={redirectUrl} />
+
+      {/* Divider */}
+      <div className="relative my-4">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-slate-200" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-3 text-slate-400 font-medium tracking-wider">
+            Or continue with email
+          </span>
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        {errorMessage && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-2 text-xs text-red-700">
-            <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-600" />
-            <span>{errorMessage}</span>
-          </div>
-        )}
 
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>

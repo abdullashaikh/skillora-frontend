@@ -32,6 +32,8 @@ interface UserProfile {
   name: string | null;
   role: string;
   isEmailVerified?: boolean;
+  hasPassword?: boolean;
+  identities?: Array<{ provider: string; createdAt: string }>;
 }
 
 export default function DashboardPage() {
@@ -251,7 +253,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
             <div>
               <span className="text-slate-400 block font-medium">Email</span>
               <span className="text-slate-800 font-semibold">{user.email}</span>
@@ -259,6 +261,23 @@ export default function DashboardPage() {
             <div>
               <span className="text-slate-400 block font-medium">Role</span>
               <span className="text-slate-800 font-semibold capitalize">{user.role.toLowerCase()}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-medium">Google Connection</span>
+              <div className="mt-0.5">
+                {user.identities?.some((i) => i.provider === 'google') ? (
+                  <span className="inline-flex items-center space-x-1 text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-semibold text-[11px]">
+                    <span>Connected</span>
+                  </span>
+                ) : (
+                  <a
+                    href="http://localhost:5000/api/auth/google?action=link&redirect=/dashboard"
+                    className="inline-flex items-center space-x-1 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-lg font-semibold text-[11px] transition"
+                  >
+                    <span>+ Link Google</span>
+                  </a>
+                )}
+              </div>
             </div>
           </div>
 

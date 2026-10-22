@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { apiFetch, parseApiResponse, clearStoredToken } from '@/lib/api';
-import { FileText, Shield, User, LogOut, LayoutDashboard, Sparkles, AlertCircle } from 'lucide-react';
+import { FileText, Shield, User, LogOut, LayoutDashboard, Sparkles, AlertCircle, BookOpen } from 'lucide-react';
 
 interface AuthUser {
   id: string;
@@ -77,6 +77,20 @@ export default function Navbar() {
             <span className="flex items-center space-x-1.5">
               <FileText className="w-4 h-4 text-slate-500" />
               <span>Analyze</span>
+            </span>
+          </Link>
+
+          <Link
+            href="/questions"
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+              pathname?.startsWith('/questions')
+                ? 'bg-slate-100 text-slate-900 font-semibold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <span className="flex items-center space-x-1.5">
+              <BookOpen className="w-4 h-4 text-slate-500" />
+              <span>Interview Q&A</span>
             </span>
           </Link>
 

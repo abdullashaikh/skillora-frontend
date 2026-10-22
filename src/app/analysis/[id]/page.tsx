@@ -29,6 +29,7 @@ import {
   BarChart3,
   Lightbulb,
   Download,
+  BookOpen,
 } from 'lucide-react';
 
 interface DimensionScore {
@@ -696,14 +697,16 @@ export default function AnalysisReportPage({
                     <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">{catName}</h4>
                     <div className="flex flex-wrap gap-2">
                       {skillsByCategory[catName].map((skill, idx) => (
-                        <div
+                        <Link
                           key={idx}
-                          title={skill.evidence ? `Evidence: "${skill.evidence}"` : undefined}
-                          className="px-2.5 py-1 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-lg text-xs font-medium text-slate-700 hover:text-indigo-700 transition cursor-help flex items-center space-x-1.5"
+                          href={`/questions?skill=${encodeURIComponent(skill.canonicalName)}`}
+                          title={skill.evidence ? `Evidence: "${skill.evidence}" — Click to practice interview questions` : 'Click to practice interview questions'}
+                          className="px-2.5 py-1 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-lg text-xs font-medium text-slate-700 hover:text-indigo-700 transition flex items-center space-x-1.5 group"
                         >
                           <span>{skill.canonicalName}</span>
                           {skill.evidence && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
-                        </div>
+                          <BookOpen className="w-3 h-3 text-slate-400 group-hover:text-indigo-600 transition" />
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -711,6 +714,30 @@ export default function AnalysisReportPage({
               </div>
             )}
           </div>
+
+          {/* Interview Preparation Recommendation based on Resume Skills */}
+          {data.skills && data.skills.length > 0 && (
+            <div className="bg-gradient-to-r from-indigo-50 via-purple-50 to-slate-50 border border-indigo-100 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center space-x-3.5">
+                <div className="p-2.5 bg-indigo-600 text-white rounded-xl shadow-xs">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm">Practice Technical Interview Questions</h4>
+                  <p className="text-xs text-slate-600">
+                    Prepare with verified questions and code drills matched to your detected resume skills.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href={`/questions?skill=${encodeURIComponent(data.skills[0]?.canonicalName || '')}`}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 shadow-xs transition flex-shrink-0"
+              >
+                <span>Browse Questions</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          )}
 
           {/* Structured Work Experience Chronology */}
           {data.extractedProfile?.experience && data.extractedProfile.experience.length > 0 && (

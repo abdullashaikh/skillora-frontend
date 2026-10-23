@@ -42,6 +42,35 @@ export default function DashboardPage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleteAccountLoading, setDeleteAccountLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const fetchAnalyses = (pageNum = 1) => {
+    apiFetch(`/resume-analyses?page=${pageNum}&limit=10`)
+      .then((res) =>
+        parseApiResponse<{
+          analyses: AnalysisItem[];
+          pagination?: {
+            page: number;
+            limit: number;
+            totalCount: number;
+            totalPages: number;
+            hasMore: boolean;
+          };
+        }>(res)
+      )
+      .then((data) => {
+        setAnalyses(data.analyses || []);
+        if (data.pagination) {
+          setPage(data.pagination.page);
+          setTotalPages(data.pagination.totalPages);
+          setTotalCount(data.pagination.totalCount);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
     // Check auth
@@ -56,14 +85,7 @@ export default function DashboardPage() {
       })
       .catch(() => router.push('/login'));
 
-    // Fetch analyses
-    apiFetch('/resume-analyses')
-      .then((res) => parseApiResponse<{ analyses: AnalysisItem[] }>(res))
-      .then((data) => {
-        setAnalyses(data.analyses || []);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    fetchAnalyses(1);
   }, [router]);
 
   const handleDeleteAnalysis = async (id: string) => {
@@ -72,6 +94,7 @@ export default function DashboardPage() {
       const res = await apiFetch(`/resume-analyses/${id}`, { method: 'DELETE' });
       await parseApiResponse(res);
       setAnalyses((prev) => prev.filter((a) => a.id !== id));
+      fetchAnalyses(page);
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Error deleting report.');
     }
@@ -239,6 +262,32 @@ export default function DashboardPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Server-Side Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
+            <span>
+              Showing page <strong className="font-semibold text-slate-900">{page}</strong> of{' '}
+              <strong className="font-semibold text-slate-900">{totalPages}</strong> ({totalCount} total reports)
+            </span>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => fetchAnalyses(page - 1)}
+                disabled={page <= 1}
+                className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-medium hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => fetchAnalyses(page + 1)}
+                disabled={page >= totalPages}
+                className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-medium hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
       </div>

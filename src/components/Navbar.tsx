@@ -59,7 +59,7 @@ export default function Navbar() {
               Skilled<span className="text-indigo-600">Resume</span>
             </span>
             <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100">
-              Phase 1 AI
+              ATS Analyzer
             </span>
           </div>
         </Link>

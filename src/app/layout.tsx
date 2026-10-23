@@ -2,10 +2,40 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://skilledresume.com';
+
 export const metadata: Metadata = {
-  title: 'Skilled Resume — Production AI Resume Analyzer',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'Skilled Resume — Production AI Resume Analyzer & Interview Prep',
+    template: '%s | Skilled Resume',
+  },
   description:
-    'Secure, fast, and explainable AI resume analysis with canonical skill normalization and transparent scoring.',
+    'Secure, fast, and explainable AI resume analysis with canonical skill normalization, ATS scoring, and comprehensive technical interview practice questions.',
+  keywords: [
+    'AI resume analyzer',
+    'ATS resume checker',
+    'interview preparation',
+    'technical questions and answers',
+    'skill extraction',
+    'career optimization',
+  ],
+  authors: [{ name: 'Skilled Resume Team' }],
+  openGraph: {
+    title: 'Skilled Resume — AI Resume Analyzer & Technical Interview Prep',
+    description:
+      'Deterministic ATS scoring, canonical skill normalization, and curated technical interview questions.',
+    url: siteUrl,
+    siteName: 'Skilled Resume',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Skilled Resume — AI Resume Analyzer & Interview Prep',
+    description:
+      'Evaluate your resume with ATS-style deterministic scoring and practice curated interview questions.',
+  },
 };
 
 export default function RootLayout({
